@@ -5,6 +5,9 @@
     <script type="text/javascript" src="${pageContext.request.contextPath}/jquery/jquery-2.1.4.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/org/cometd.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/jquery/jquery.cometd.js"></script>
+
+    <!-- data-main attribute tells require.js to load
+                     application.js after require.js loads. -->
     <script data-main="application"  src="require.js"></script>
     <%--
     The reason to use a JSP is that it is very easy to obtain server-side configuration
