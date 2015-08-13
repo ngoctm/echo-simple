@@ -1,25 +1,17 @@
 package org.cometd.primer;
 
 /**
- * Created by ngocnt on 8/12/15.
+ * Created by ngoctm on 8/12/15.
  */
 import org.cometd.annotation.*;
-import org.cometd.bayeux.Message;
 import org.cometd.bayeux.server.*;
 import org.cometd.server.BayeuxServerImpl;
 import org.cometd.server.authorizer.GrantAuthorizer;
-import org.cometd.server.ext.AcknowledgedMessagesExtension;
-import org.cometd.server.ext.TimesyncExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Map;
 
 public class CometDDemoServlet extends HttpServlet
@@ -32,35 +24,8 @@ public class CometDDemoServlet extends HttpServlet
     super.init();
     final BayeuxServerImpl bayeux = (BayeuxServerImpl)getServletContext().getAttribute(BayeuxServer.ATTRIBUTE);
 
-    if (bayeux == null)
-      throw new UnavailableException("No BayeuxServer!");
-
-    // Create extensions
-    bayeux.addExtension(new TimesyncExtension());
-    bayeux.addExtension(new AcknowledgedMessagesExtension());
-
-    // Deny unless granted
-
-    bayeux.createChannelIfAbsent("/**", new ServerChannel.Initializer()
-    {
-      public void configureChannel(ConfigurableServerChannel channel)
-      {
-        channel.addAuthorizer(GrantAuthorizer.GRANT_NONE);
-      }
-    });
-
-    // Allow anybody to handshake
-    bayeux.getChannel(ServerChannel.META_HANDSHAKE).addAuthorizer(GrantAuthorizer.GRANT_PUBLISH);
-
     ServerAnnotationProcessor processor = new ServerAnnotationProcessor(bayeux);
     processor.process(new EchoRPC());
-    processor.process(new Monitor());
-    // processor.process(new ChatService());
-
-    bayeux.createChannelIfAbsent("/foo/bar/baz", new ConfigurableServerChannel.Initializer.Persistent());
-
-    if (logger.isDebugEnabled())
-      logger.debug(bayeux.dump());
   }
 
   @Override
@@ -84,33 +49,5 @@ public class CometDDemoServlet extends HttpServlet
       logger.info("ECHO from " + caller.getServerSession() + ": " + data);
       caller.result(data);
     }
-  }
-
-  @Service("monitor")
-  public static class Monitor
-  {
-    @Listener("/meta/subscribe")
-    public void monitorSubscribe(ServerSession session, ServerMessage message)
-    {
-      logger.info("Monitored Subscribe from " + session + " for " + message.get(Message.SUBSCRIPTION_FIELD));
-    }
-
-    @Listener("/meta/unsubscribe")
-    public void monitorUnsubscribe(ServerSession session, ServerMessage message)
-    {
-      logger.info("Monitored Unsubscribe from " + session + " for " + message.get(Message.SUBSCRIPTION_FIELD));
-    }
-
-    @Listener("/meta/*")
-    public void monitorMeta(ServerSession session, ServerMessage message)
-    {
-      if (logger.isDebugEnabled())
-        logger.debug(message.toString());
-    }
-  }
-
-  public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException
-  {
-    ((HttpServletResponse)res).sendError(503);
   }
 }

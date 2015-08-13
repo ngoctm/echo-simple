@@ -27,7 +27,6 @@ function($, cometd)
             });
         }
 
-        $(window).on("beforeunload", cometd.reload);
 
         var phrase = $("#phrase");
         phrase.attr("autocomplete", "OFF");
@@ -41,6 +40,7 @@ function($, cometd)
             }
             return true;
         });
+
         var sendB = $("#sendB");
         sendB.on("click", function()
         {
@@ -49,6 +49,7 @@ function($, cometd)
             return false;
         });
 
+        // Disable the websocket transport
         cometd.websocketEnabled = false;
 
         function _connectionEstablished()
@@ -103,8 +104,10 @@ function($, cometd)
                     });
                     // Publish on a service channel since the message is for the server only
                     cometd.publish('/service/hello', { name: 'World' });
+
                     echoRpc("Type something in the textbox above");
                 });
+
             }
         }
 
