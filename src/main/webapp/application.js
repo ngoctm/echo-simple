@@ -11,7 +11,7 @@ function($, cometd)
 {
     $(document).ready(function()
     {
-         function echoRpc(text)
+        function echoRpc(text)
         {
             console.debug("Echoing", text);
 
